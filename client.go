@@ -419,7 +419,7 @@ func (c *Client) Kill() {
 	// Grab a lock to read some private fields.
 	c.l.Lock()
 	process := c.process
-	addr := c.address
+	// addr := c.address
 	c.l.Unlock()
 
 	// If there is no process, there is nothing to kill.
@@ -442,38 +442,38 @@ func (c *Client) Kill() {
 	// started (process != nil) but has no address (addr == nil) if the
 	// plugin failed at startup. If we do have an address, we need to close
 	// the plugin net connections.
-	graceful := false
-	if addr != nil {
-		// Close the client to cleanly exit the process.
-		client, err := c.Client()
-		if err == nil {
-			err = client.Close()
+	// graceful := false
+	// if addr != nil {
+	// 	// Close the client to cleanly exit the process.
+	// 	client, err := c.Client()
+	// 	if err == nil {
+	// 		err = client.Close()
 
-			// If there is no error, then we attempt to wait for a graceful
-			// exit. If there was an error, we assume that graceful cleanup
-			// won't happen and just force kill.
-			graceful = err == nil
-			if err != nil {
-				// If there was an error just log it. We're going to force
-				// kill in a moment anyways.
-				c.logger.Warn("error closing client during Kill", "err", err)
-			}
-		} else {
-			c.logger.Error("client", "error", err)
-		}
-	}
+	// 		// If there is no error, then we attempt to wait for a graceful
+	// 		// exit. If there was an error, we assume that graceful cleanup
+	// 		// won't happen and just force kill.
+	// 		graceful = err == nil
+	// 		if err != nil {
+	// 			// If there was an error just log it. We're going to force
+	// 			// kill in a moment anyways.
+	// 			c.logger.Warn("error closing client during Kill", "err", err)
+	// 		}
+	// 	} else {
+	// 		c.logger.Error("client", "error", err)
+	// 	}
+	// }
 
 	// If we're attempting a graceful exit, then we wait for a short period
 	// of time to allow that to happen. To wait for this we just wait on the
 	// doneCh which would be closed if the process exits.
-	if graceful {
-		select {
-		case <-c.doneCtx.Done():
-			c.logger.Debug("plugin exited")
-			return
-		case <-time.After(2 * time.Second):
-		}
-	}
+	// if graceful {
+	// 	select {
+	// 	case <-c.doneCtx.Done():
+	// 		c.logger.Debug("plugin exited")
+	// 		return
+	// 	case <-time.After(2 * time.Second):
+	// 	}
+	// }
 
 	// If graceful exiting failed, just kill it
 	c.logger.Warn("plugin failed to exit gracefully")
